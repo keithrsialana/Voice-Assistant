@@ -1,9 +1,15 @@
-# Voice-Assistant
+# Voice Assistant
 
 ## Set up
 Before running the code, make sure to install the right libraries using pip.
 ```
 pip install SpeechRecognition pyttsx3
+```
+
+## Running the Application
+With the current version of the application, running the code is simply just like running any other Python application.
+```
+python ./main.py
 ```
 
 ## About
@@ -16,11 +22,8 @@ These are features that are have been completed:
 - naming the user
 - sleep mode
 
-## Running the Application
-With the current version of the application, running the code is simply just like running any other Python application.
-```
-python ./main.py
-```
+## Known bugs
+- creating an alarm doesn't call the right bash command, resulting in the alarm not being set.
 
 ## Future Goals
 I can only work on creating this application when I have the free time to do so. That being said, these are the listed goals I have for this project:
