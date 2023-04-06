@@ -23,6 +23,7 @@ These are features that are have been completed:
 - sleep mode
 
 ## Known bugs
+- depending on the mic, the assistant will hear background sounds. Can interfere with multi-input tasks like setting an alarm or creating an event on the calendar.
 - creating an alarm doesn't call the right bash command, resulting in the alarm not being set.
 
 ## Future Goals

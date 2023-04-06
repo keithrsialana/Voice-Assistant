@@ -16,15 +16,15 @@ engine = pyttsx3.init()
 r = sr.Recognizer()
 
 # use a specific microphone device by index
-mic = sr.Microphone(device_index=2)
+# mic = sr.Microphone(device_index=2)
 
 # adjust for ambient noise using the specified microphone device
-with mic as source:
-    r.adjust_for_ambient_noise(source)
+# with mic as source:
+#     r.adjust_for_ambient_noise(source)
 
 # Set the default audio source
-# with sr.Microphone() as source:
-#     r.adjust_for_ambient_noise(source)
+with sr.Microphone() as source:
+    r.adjust_for_ambient_noise(source)
 
 # Define a function to speak the response
 def speak(text):
@@ -33,7 +33,10 @@ def speak(text):
 
 # Define a function to recognize speech
 def recognize_speech():
-    with mic as source:
+
+    # For switching between default mic or specific mic
+    with sr.Microphone() as source:
+    # with mic as source:
         audio = r.listen(source)
         try:
             query = r.recognize_google(audio)
@@ -47,15 +50,21 @@ def recognize_speech():
             query = ""
     return query
 
+# Define a function to loop voice input if nothing is heard or understood
+def get_input():
+    while True:
+        voiceInput = recognize_speech()
+        if voiceInput != "":
+            return voiceInput
+        
 # Define a function to set an alarm TODO
 def set_alarm():
     alarm_name = ""
     alarm_time = ""
     snoozeTime = ""
-    cmd = f'ms-switchalarms.exe create "{alarm_name}" /time "{alarm_time}" /snooze {snoozeTime} /sound "Alarm"'
 
     speak("What time do you want to set the alarm for?")
-    alarm_time = recognize_speech()
+    alarm_time = get_input()
 
     # Replaces to proper AM/PM format
     if "a.m." in alarm_time:
@@ -74,14 +83,13 @@ def set_alarm():
     
     # Set Alarm Name
     speak("What would you like to call the alarm?")
-    alarm_name = recognize_speech()
+    alarm_name = get_input()
 
     # Set snooze time
-    snoozeTime = ""
     speak("Set the snooze time?")
-    if recognize_speech() == "yes":
+    if get_input() == "yes":
         speak("How many minutes?")
-        snoozeTime = recognize_speech()
+        snoozeTime = get_input()
         if "minute" in snoozeTime:
             snoozeTime = snoozeTime.replace("minute", "")
         if "miuntes" in snoozeTime:
@@ -92,9 +100,9 @@ def set_alarm():
 
     # Set repeat
     speak("Would you like it to repeat?")
-    if recognize_speech() == "yes":
+    if get_input() == "yes":
         speak("Which days would you like it to repeat on?")
-        days = recognize_speech()
+        days = get_input()
         foundDays = ""
         if "monday" in days:
             foundDays = foundDays + "M"
@@ -110,10 +118,12 @@ def set_alarm():
             foundDays = foundDays + ",S"
         if "sunday" in days:
             foundDays = foundDays + ",Su"
-        cmd = cmd + f' /repeat "{foundDays}"'
         
     # Execute the command to set the alarm
     # cmd = f'ms-switchalarms.exe create "Alarm Name" /time "8:00 AM" /snooze 5 /sound "Alarm" /repeat "M,T,W,Th,F,S,Su"'
+    cmd = f'ms-switchalarms.exe create "{alarm_name}" /time "{alarm_time}" /snooze {snoozeTime} /sound "Alarm"'
+    if foundDays:
+        cmd = cmd + f' /repeat "{foundDays}"'
     print("Executing command:", cmd)
     subprocess.run(cmd, shell=True)
 
@@ -162,7 +172,7 @@ def search_web():
 # Define a function to set the user's name
 def set_user_name():
     speak("What is your name?")
-    name = recognize_speech().lower().replace("my name is", "").replace("my name's'", "").replace("i'm", "").strip()
+    name = get_input().lower().replace("my name is", "").replace("my name's'", "").replace("i'm", "").strip()
     with open("user_name.txt", "w") as f:
         f.write(name)
     speak(f"Okay, from now on, I will call you {name}")
@@ -181,7 +191,7 @@ def get_user_name():
 # Define a function to set the name of the voice assistant
 def set_name():
     speak("What would you like to name me?")
-    name = recognize_speech().lower()
+    name = get_input().lower()
     with open("name.txt", "w") as f:
         f.write(name)
     speak(f"From now on, you can call me {name}.")
@@ -215,7 +225,7 @@ def start_listening():
     listening = True
     while True:
         if listening:
-            query = recognize_speech().lower()
+            query = get_input().lower()
             if is_called(query):
                 query = query.replace(get_name(), "").strip()
                 if "set an alarm" in query or "set alarm" in query or "add an alarm" in query or "add alarm" in query:
@@ -250,7 +260,8 @@ def start_listening():
             else:
                 print("I heard something, but my name was not called")
         else:
-            if is_called(recognize_speech().lower()):
+            if is_called(get_input().lower()):
+                userName = get_user_name()
                 speak(f"Hello {userName}! I'm back and ready to listen to your commands.")
                 listening = True
 
