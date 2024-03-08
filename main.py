@@ -213,7 +213,7 @@ def is_called(query):
         return True
     elif "assistant change your name" in query:
         set_name()
-    elif "assistant what's your name" or "assistant what is your name" in query:
+    elif "assistant what's your name" in query or "assistant what is your name" in query:
         speak(f"My name is {name}.")
         return False
     else:

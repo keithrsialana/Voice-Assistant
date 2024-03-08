@@ -22,10 +22,10 @@ This voice assistant is a personal passion project that mainly tests my capabili
 
 ## Current Functionalities
 These are Functionalities that have been completed:
-- searching the web
-- naming the assistant
-- naming the user
-- sleep mode
+- searching the web ("Search something up on Google for me")
+- naming the assistant ("Change your name")
+- naming the user ("Change my name")
+- sleep mode ("Go to sleep")
 
 ## Known bugs
 - depending on the mic, the assistant will hear background sounds. Can interfere with multi-input tasks like setting an alarm or creating an event on the calendar.
