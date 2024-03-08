@@ -2,12 +2,17 @@
 
 ## Set up
 Before running the code, make sure to install the right libraries using pip.
+Since distutils was discontinued at update 3.12, you're going to need to install `setuptools` and `pyaudio` as well.
 ```
-pip install SpeechRecognition pyttsx3
+pip install SpeechRecognition pyttsx3 setuptools pyaudio
 ```
 
 ## Running the Application
 With the current version of the application, running the code is simply just like running any other Python application.
+```
+py ./main.py
+```
+or
 ```
 python ./main.py
 ```
@@ -15,8 +20,8 @@ python ./main.py
 ## About
 This voice assistant is a personal passion project that mainly tests my capabilities to learn and understand external libraries to integrate onto a modern project that would be deemed quite interesting. I myself have always wanted to know how to create a fully automated assistant like Siri and Bigsby.
 
-## Features
-These are features that are have been completed:
+## Current Functionalities
+These are Functionalities that have been completed:
 - searching the web
 - naming the assistant
 - naming the user

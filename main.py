@@ -57,7 +57,7 @@ def get_input():
         if voiceInput != "":
             return voiceInput
         
-# Define a function to set an alarm TODO
+# TODO Define a function to set an alarm
 def set_alarm():
     alarm_name = ""
     alarm_time = ""
@@ -130,7 +130,7 @@ def set_alarm():
     # subprocess.Popen(['cmd.exe', '/c', 'start', 'ms-clock:', f'/alarm {alarm_time}'])
     return
 
-# Define a function to add an event to the calendar TODO
+# TODO Define a function to add an event to the calendar
 def add_event():
     speak("What is the name of the event?")
     event_name = recognize_speech()
@@ -138,7 +138,7 @@ def add_event():
     event_time = recognize_speech()
     subprocess.Popen(['outlook.exe', '/c', 'IPM.Appointment', f'/subject "{event_name}"', f'/start "{event_time}"'])
 
-# Define a function to remove an event from the calendar TODO
+# TODO Define a function to remove an event from the calendar
 def remove_event():
     speak("What is the name of the event you want to remove?")
     event_name = recognize_speech()
@@ -150,18 +150,19 @@ def remove_event():
             item.Delete()
             speak(f"{event_name} has been removed from the calendar.")
 
-# Define a function to open an application TODO
+# TODO Define a function to open an application
 def open_application():
     speak("Which application do you want to open?")
     app_name = recognize_speech().lower()
 
-# Define a function to close an application TODO
+# TODO Define a function to close an application
 def close_application():
     speak("Which application do you want to close?")
     app_name = recognize_speech().lower()
     os.system(f"taskkill /f /im {app_name}.exe")
 
-# Define a function to search the web TODO
+# FIXME Maybe make it so that it will say the first result in the query?
+# Define a function to search the web
 def search_web():
     speak("What do you want to search for?")
     query = recognize_speech().lower()
@@ -212,7 +213,7 @@ def is_called(query):
         return True
     elif "assistant change your name" in query:
         set_name()
-    elif "assistant what's your name" in query:
+    elif "assistant what's your name" or "assistant what is your name" in query:
         speak(f"My name is {name}.")
         return False
     else:
@@ -221,7 +222,8 @@ def is_called(query):
 # Define a function to start listening for commands only when the name is called
 def start_listening():
     userName = get_user_name()
-    speak(f"Hello {userName}, How can I help you?")
+    assistantName = get_name()
+    speak(f"Hello {userName}, I am {assistantName}, How can I help you?")
     listening = True
     while True:
         if listening:
