@@ -3,7 +3,6 @@ import pyttsx3
 import os
 import subprocess
 import webbrowser
-import datetime
 import win32com.client as wincl
 import sys
 import re
@@ -50,6 +49,19 @@ def recognize_speech():
             query = ""
     return query
 
+def calculate(operator,x,y):
+    x = float(x)
+    y = float(y)
+
+    if ("times" in operator):
+        return x*y
+    elif ("plus" in operator):
+        return x+y
+    elif ("minus" in operator):
+        return x-y
+    elif ("divided by" in operator):
+        return x/y
+  
 # Define a function to loop voice input if nothing is heard or understood
 def get_input():
     while True:
@@ -161,7 +173,6 @@ def close_application():
     app_name = recognize_speech().lower()
     os.system(f"taskkill /f /im {app_name}.exe")
 
-# FIXME Maybe make it so that it will say the first result in the query?
 # Define a function to search the web
 def search_web():
     speak("What do you want to search for?")
@@ -219,6 +230,13 @@ def is_called(query):
     else:
         return False
 
+def is_numeric(str):
+    try:
+        float(str)
+        return True
+    except ValueError:
+        return False
+
 # Define a function to start listening for commands only when the name is called
 def start_listening():
     userName = get_user_name()
@@ -232,6 +250,25 @@ def start_listening():
                 query = query.replace(get_name(), "").strip()
                 if "set an alarm" in query or "set alarm" in query or "add an alarm" in query or "add alarm" in query:
                     set_alarm()
+                elif ("what's" in query or "what is" in query) and ("*" in query or "-" in query or "+" in query or "/" in query):
+                    words = query.split()
+                    numbers = []
+                    for i in words:
+                        if (is_numeric(i)):
+                            numbers.append(i)
+                    # assume only two numbers
+                    if ("*" in words):
+                        operator = "times"
+                    elif ("-" in words):
+                        operator = "minus"
+                    elif ("+" in words):
+                        operator = "plus"
+                    elif ("/" in words):
+                        operator = "divided by"
+
+                    calculateResult = calculate(operator, numbers[0], numbers[1])
+                    speak(f"The answer for {numbers[0]} {operator} {numbers[1]} is {calculateResult}")
+
                 elif "add event" in query or "add an event" in query:
                     add_event()
                 elif "remove event" in query or "remove an event" in query:
