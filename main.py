@@ -230,12 +230,32 @@ def is_called(query):
     else:
         return False
 
+# Define a function to check if the input is a number or not
 def is_numeric(str):
     try:
         float(str)
         return True
     except ValueError:
         return False
+    
+def calculateResponse(query):
+    words = query.split()
+    numbers = []
+    for i in words:
+        if (is_numeric(i)):
+            numbers.append(i)
+    # assume only two numbers
+    if ("*" in words):
+        operator = "times"
+    elif ("-" in words):
+        operator = "minus"
+    elif ("+" in words):
+        operator = "plus"
+    elif ("/" in words):
+        operator = "divided by"
+
+    calculateResult = calculate(operator, numbers[0], numbers[1])
+    speak(f"The answer for {numbers[0]} {operator} {numbers[1]} is {calculateResult}")
 
 # Define a function to start listening for commands only when the name is called
 def start_listening():
@@ -251,24 +271,7 @@ def start_listening():
                 if "set an alarm" in query or "set alarm" in query or "add an alarm" in query or "add alarm" in query:
                     set_alarm()
                 elif ("what's" in query or "what is" in query) and ("*" in query or "-" in query or "+" in query or "/" in query):
-                    words = query.split()
-                    numbers = []
-                    for i in words:
-                        if (is_numeric(i)):
-                            numbers.append(i)
-                    # assume only two numbers
-                    if ("*" in words):
-                        operator = "times"
-                    elif ("-" in words):
-                        operator = "minus"
-                    elif ("+" in words):
-                        operator = "plus"
-                    elif ("/" in words):
-                        operator = "divided by"
-
-                    calculateResult = calculate(operator, numbers[0], numbers[1])
-                    speak(f"The answer for {numbers[0]} {operator} {numbers[1]} is {calculateResult}")
-
+                    calculateResponse(query)
                 elif "add event" in query or "add an event" in query:
                     add_event()
                 elif "remove event" in query or "remove an event" in query:
