@@ -7,6 +7,7 @@ import win32com.client as wincl
 import sys
 import re
 from datetime import datetime as dt
+import pyautogui as typer
 
 # Initialize text-to-speech engine
 engine = pyttsx3.init()
@@ -22,8 +23,8 @@ r = sr.Recognizer()
 #     r.adjust_for_ambient_noise(source)
 
 # Set the default audio source
-with sr.Microphone() as source:
-    r.adjust_for_ambient_noise(source)
+# with sr.Microphone() as source:
+#     r.adjust_for_ambient_noise(source)
 
 # Define a function to speak the response
 def speak(text):
@@ -41,7 +42,7 @@ def recognize_speech():
             query = r.recognize_google(audio)
             print("You said: " + query)
             if query == "cancel" or query == "never mind" or query == "nevermind":
-                query == ""
+                query = ""
         except sr.UnknownValueError:
             query = ""
         except sr.RequestError:
@@ -49,25 +50,12 @@ def recognize_speech():
             query = ""
     return query
 
-def calculate(operator,x,y):
-    x = float(x)
-    y = float(y)
-
-    if ("times" in operator):
-        return x*y
-    elif ("plus" in operator):
-        return x+y
-    elif ("minus" in operator):
-        return x-y
-    elif ("divided by" in operator):
-        return x/y
-  
 # Define a function to loop voice input if nothing is heard or understood
 def get_input():
     while True:
         voiceInput = recognize_speech()
         if voiceInput != "":
-            return voiceInput
+            return str(voiceInput)
         
 # TODO Define a function to set an alarm
 def set_alarm():
@@ -219,7 +207,7 @@ def get_name():
     
 # Define a function to check if the voice assistant's name was called or if the user asked for the name
 def is_called(query):
-    name = get_name()
+    name = get_name().lower()
     if name in query:
         return True
     elif "assistant change your name" in query:
@@ -238,70 +226,110 @@ def is_numeric(str):
     except ValueError:
         return False
     
-def calculateResponse(query):
-    words = query.split()
-    numbers = []
-    for i in words:
-        if (is_numeric(i)):
-            numbers.append(i)
-    # assume only two numbers
-    if ("*" in words):
-        operator = "times"
-    elif ("-" in words):
-        operator = "minus"
-    elif ("+" in words):
-        operator = "plus"
-    elif ("/" in words):
-        operator = "divided by"
+def calculate_response(query):
+    try:
+        # Use regex to extract numbers and operators from the query
+        tokens = re.findall(r'\d+\.?\d*|[-+*/()]', query)
+        
+        processed_tokens = []
+        for token in tokens:
+            if is_numeric(token):
+                number = float(token)
+                # If the number is an integer, convert it to int
+                if number.is_integer():
+                    processed_tokens.append(int(number))  # Save as int if it's a whole number
+                else:
+                    processed_tokens.append(number)  # Save as float otherwise
+            else:
+                processed_tokens.append(token)  # Keep the operator as a string
+        
+        # Join the tokens back into a string to evaluate
+        expression = ' '.join(map(str, processed_tokens))
+        result = eval(expression)  # Evaluate the expression
 
-    calculateResult = calculate(operator, numbers[0], numbers[1])
-    speak(f"The answer for {numbers[0]} {operator} {numbers[1]} is {calculateResult}")
+        print(f"The result of {expression} is {result}")
+        
+        speakWords = map(str, processed_tokens)
+        wordList = list(speakWords)
+        for word in wordList:
+            if word == "*":
+                wordList[wordList.index(word)] = "times"
+            if word == "+":
+                wordList[wordList.index(word)] = "plus"
+            if word == "-":
+                wordList[wordList.index(word)] = "minus"
+            if word == "/":
+                wordList[wordList.index(word)] = "divided by"
+            
+        speakString = ' '.join(wordList)
+        speak(f"The result of {speakString} is {result}")
+    
+    except Exception as e:
+        print("Error in calculation:", e)
+        speak("I'm sorry, something went wrong with the calculation.")
+
+def start_typing():
+    isTyping = True
+    speak("Okay, tell me when to stop typing")
+    while(isTyping):
+        query = get_input().lower()
+        if (query == "stop typing"):
+            isTyping = False
+        else:
+            typer.write(query + ' ')
+    speak("Okay, I won't type anymore")
 
 # Define a function to start listening for commands only when the name is called
 def start_listening():
     userName = get_user_name()
     assistantName = get_name()
     speak(f"Hello {userName}, I am {assistantName}, How can I help you?")
+
+    # Command-to-function mapping
+    commands = {
+        (""): lambda: speak(""),
+        ("hi", "are you here", "hello", "are you still here", "can you hear me", "are you there"): lambda: speak("Yes, I'm still here"),
+        ("set an alarm", "set alarm", "add an alarm", "add alarm"): set_alarm,
+        ("add event", "add an event"): add_event,
+        ("remove event", "remove an event"): remove_event,
+        ("open application", "open an application"): open_application,
+        ("close application", "close an application"): close_application,
+        ("search web", "google something for me", "look something up"): search_web,
+        ("change your name",): set_name,
+        ("what's my name",): lambda: speak(f"You are {get_user_name()}"),
+        ("change my name",): set_user_name,
+        ("what's", "what is"): calculate_response,
+        ("you can sleep", "sleep"): lambda: (speak("Okay, let me know if you need anything."), False),
+        ("close yourself", "exit", "turn off", "power down", "shut down", "shutdown", "shut off"): lambda: (speak("Goodbye!"), sys.exit()),
+        ("type for me"): start_typing
+    }
+
     listening = True
+
     while True:
         if listening:
             query = get_input().lower()
+
             if is_called(query):
-                query = query.replace(get_name(), "").strip()
-                if "set an alarm" in query or "set alarm" in query or "add an alarm" in query or "add alarm" in query:
-                    set_alarm()
-                elif ("what's" in query or "what is" in query) and ("*" in query or "-" in query or "+" in query or "/" in query):
-                    calculateResponse(query)
-                elif "add event" in query or "add an event" in query:
-                    add_event()
-                elif "remove event" in query or "remove an event" in query:
-                    remove_event()
-                elif "open application" in query or "open an application" in query:
-                    open_application()
-                elif "close application" in query or "close an application " in query:
-                    close_application()
-                elif "search web" in query or "google something for me" in query or "look something up" in query:
-                    search_web()
-                elif "change your name" in query:
-                    set_name()
-                elif "what's my name" in query:
-                    foundUserName = get_user_name()
-                    speak(f"You are {foundUserName}")
-                elif "change my name" in query:
-                    set_user_name()
-                elif "hi" in query or "are you here" in query or "hello" in query or "are you still here" in query or "can you hear me" in query or "are you there" in query:
-                    speak("Yes, I'm still here")
-                elif "you can sleep" in query or "sleep" in query:
-                    speak("Okay, let me know if you need anything.")
-                    listening = False
-                elif "close yourself" in query or "exit" in query or "turn off" in query or "power down" in query or "shut down" in query or "shutdown" in query or "shut off" in query:
-                    speak("Goodbye!")
-                    sys.exit()
+                query = query.replace(assistantName.lower(), "").strip()
+                
+                # Find the corresponding command
+                for command_phrases, command_function in commands.items():
+                    
+                    if any(command in query for command in command_phrases):
+                        if command_function == calculate_response:
+                            command_function(query)
+                        else:
+                            command_function()
+                        break
+                    else:
+                        continue
                 else:
                     speak("Sorry, I did not understand that. Please try again.")
             else:
                 print("I heard something, but my name was not called")
         else:
+            # If not listening, wait for the assistant's name to be called to reactivate
             if is_called(get_input().lower()):
                 userName = get_user_name()
                 speak(f"Hello {userName}! I'm back and ready to listen to your commands.")

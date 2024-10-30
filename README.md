@@ -1,10 +1,15 @@
 # Voice Assistant
 
 ## Set up
-Before running the code, make sure to install the right libraries using pip.
-Since distutils was discontinued at update 3.12, you're going to need to install `setuptools` and `pyaudio` as well.
+Before running the code, make sure to install the right libraries using pip. Run these commands in a terminal in order:
 ```
-pip install SpeechRecognition pyttsx3 setuptools pyaudio
+python -m venv venv
+```
+```
+venv/Scripts/activate
+```
+```
+pip install -r requirements.txt
 ```
 
 ## Running the Application
